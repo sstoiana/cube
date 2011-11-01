@@ -1,15 +1,20 @@
 var util = require("util"),
-    cube = require("../../../"),
+    dgram = require('dgram'),
     options = require("./random-config"),
     count = 0,
     batch = 10,
     hour = 60 * 60 * 1000,
     start = Date.now(),
-    offset = -Math.abs(random()) * 24 * hour;
+    offset = -Math.abs(random()) * 0.1 * hour;
 
-// Connect to websocket.
-util.log("starting websocket client");
-var client = cube.emitter().open(options["http-host"], options["http-port"]);
+var client = {
+  send: function(data) {
+    var message = new Buffer(JSON.stringify(data));
+    var client = dgram.createSocket("udp4");
+    client.send(message, 0, message.length, 1180, "localhost");
+    client.close();
+  }
+};
 
 // Emit random values.
 var interval = setInterval(function() {
@@ -17,7 +22,7 @@ var interval = setInterval(function() {
     client.send({
       type: "random",
       time: new Date(Date.now() + random() * 2 * hour + offset),
-      data: {random: (offset & 1 ? 1 : -1) * Math.random()}
+      data: {random: Math.random()}
     });
     count++;
   }
@@ -27,8 +32,6 @@ var interval = setInterval(function() {
 
 // Display stats on shutdown.
 process.on("SIGINT", function() {
-  console.log("stopping websocket client");
-  client.close();
   clearInterval(interval);
 });
 
