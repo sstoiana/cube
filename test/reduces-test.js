@@ -69,8 +69,8 @@ suite.addBatch({
     topic: function() {
       return reduces.median;
     },
-    "empty is undefined": function(reduce) {
-      assert.strictEqual(reduce.empty, undefined);
+    "empty is zero": function(reduce) {
+      assert.strictEqual(reduce.empty, 0);
     },
     "is not pyramidal": function(reduce) {
       assert.isTrue(!reduce.pyramidal);
