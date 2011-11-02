@@ -12,7 +12,12 @@ suite.addBatch({
         keys.push(key);
       }
       keys.sort();
-      assert.deepEqual(keys, ["distinct", "max", "median", "min", "sum"]);
+      assert.deepEqual(keys, ["distinct",
+                              "max",
+                              "median",
+                              "min",
+                              "percentile",
+                              "sum"]);
     }
   },
 
@@ -112,6 +117,34 @@ suite.addBatch({
     },
     "returns the first of equal values": function(reduce) {
       assert.strictEqual(reduce([1, new Number(1)]), 1);
+    }
+  },
+
+  "percentile": {
+    topic: function() {
+      return reduces.percentile;
+    },
+    "empty is zero": function(reduce) {
+      assert.strictEqual(reduce.empty, 0);
+    },
+    "is not pyramidal": function(reduce) {
+      assert.isTrue(!reduce.pyramidal);
+    },
+    "returns the median value when requested": function(reduce) {
+      assert.equal(reduce([1, 2, 3, 2, 1], "0.5"), 2);
+      assert.equal(reduce([1, 2, 4, 2, 1, 4, 4, 4], "0.5"), 3);
+    },
+    "returns a percentile value": function(reduce) {
+      assert.equal(reduce([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], '0.9'), 9);
+      assert.equal(reduce([10, 1, 2, 3, 5, 7, 6, 4, 8, 9, 0], '0.9'), 9);
+    },
+    "sorts input in-place": function(reduce) {
+      var values = [1, 2, 3, 2, 1];
+      reduce(values);
+      assert.deepEqual(values, [1, 1, 2, 2, 3]);
+    },
+    "ignores undefined and NaN": function(reduce) {
+      assert.equal(reduce([1, NaN, 3, undefined, 0], "0.5"), 0);
     }
   },
 
