@@ -11,7 +11,7 @@ var client = {
   send: function(data) {
     var message = new Buffer(JSON.stringify(data));
     var client = dgram.createSocket("udp4");
-    client.send(message, 0, message.length, 1180, "localhost");
+    client.send(message, 0, message.length, options['udp-port'], options['udp-host']);
     client.close();
   }
 };
